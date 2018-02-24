@@ -16,11 +16,20 @@
 </head>
 
 <body>
-    <p>Tests for ASM, WASM, HTTPS, WebGL, getUserMedia, and successful camera access.</p>
-    <p>On success we expect to see a video object showing a live camera feed.</p>
-    <p>Check the console for any errors and warnings.</p>
+    <div>
+        <h1>Tests example</h1>
+        <p>Tests for ASM, WASM, HTTPS, WebGL, getUserMedia, and successful camera access.</p>
+        <p>Check the console for any other errors and warnings.</p>
+        <p>On success we expect to see a video object showing a live camera feed, otherwise an error message will show. </p>
+    </div>
 
     <script type="text/javascript">
+        var codes = {
+            error: 2,
+            warning: 1,
+            ok: 0
+        };
+
         var canUseWebAssembly = function () {
             return typeof WebAssembly === 'object' ? true : false;
         };
@@ -77,12 +86,12 @@
                 window.stream = stream; // make stream available to browser console
                 video.srcObject = stream;
                 document.body.appendChild(video);
-                callback(true);
+                callback(false);
             }
 
             function handleError(error) {
                 console.log('navigator.getUserMedia error: ', error);
-                callabck(false);
+                callback(true, error);
             }
 
             navigator.mediaDevices.getUserMedia(constraints).
@@ -90,55 +99,72 @@
         };
 
         var runTests = function () {
-            var returnCode = 0;
+            var returnCode = codes.ok;
 
             // Warnings
-            if(!canUseWebAssembly) {
+            if (!canUseWebAssembly) {
                 console.log('Warning, WebAssembly not supported. Performance may be a degraded, should fallback to ASM.');
-                returnCode = 1;
+                returnCode = codes.warning;
             }
 
             if (!canUseASM) {
                 console.log('Warning, ASM not supported. Performance may be a degraded, will fallback to standard JavaScript execution.');
-                returnCode = 1;
+                returnCode = codes.warning;
             }
 
             if (!isHTTPS) {
                 console.log('Warning, web camera access might be blocked. Most browsers only allow access to the web camera when the site is secure');
-                returnCode = 1;
+                returnCode = codes.warning;
             }
 
             // Errors
             if (!canUseWebGL) {
                 console.log('Error, browser not supported. Web browser does not support WebGL.');
-                returnCode = 2;
+                returnCode = codes.error;
             }
 
             if (!canUseGetUserMedia) {
                 console.log('Error, browser not supported. Web browser does not support getting a web camera.');
-                returnCode = 2;
+                returnCode = codes.error;
             }
 
             return returnCode;
         };
 
+        var appendMessage = function (element, message, color) {
+            var e = document.createElement(element);
+            e.style.color = color;
+            e.innerHTML = message;
+            document.body.appendChild(e);
+        };
+
         window.onload = function (e) {
-            switch (runTests) {
-                case 1:
+            var code = runTests();
+            switch (code) {
+                case codes.warning:
                     console.log('Tests passed but with warnings');
+                    appendMessage('h2', 'Tests passed but with warnings', '#FFAF00');
                     break;
-                case 2:
-                    console.log('Tests failed');
+                case codes.error:
+                    console.log('', 'Tests failed');
+                    appendMessage('h2', 'Tests passed but with warnings', '#FF0000');
                     break;
                 default:
-                    captureAndInjectCameraFeed(function (passed) {
-                        if (passed) {
-                            console.log('Tests passed, camera was found and injected into body');
-                        } else {
-                            console.log('Warning, Tests passed however could not find a camera to inject into the body, please check the "navigator.getUserMedia error" console log');
-                        }
-                    });
+                    console.log('Tests passed');
+                    appendMessage('h2', 'Tests passed', '#00FF00');
                     break;
+            }
+
+            if (code < codes.error) {
+                captureAndInjectCameraFeed(function (error, message) {
+                    if (!error) {
+                        console.log('Camera was found and injected into body');
+                    } else {
+                        console.log('Warning, Tests passed however could not find a camera to inject into the body, please check the "navigator.getUserMedia error" console log');
+                        appendMessage('h2', 'Failed to capture a camera stream', '#FFAF00');
+                        appendMessage('p', JSON.stringify(message), '#FFAF00');
+                    }
+                });
             }
         };
     </script>
