@@ -1,6 +1,8 @@
 # README
 I am currently creating a lot of C++/OpenGL compositing applicaitons which require the use of a Webcam. The builds output WASM and ASM files which utilise WebGL and getUserMedia. This repo is a simple test case for anyone to use - as is - to check similar browser compatibility issues. 
 
+Live example here: https://marcusbelcher.github.io/emscripten-webcam-gl-test/index.html
+
 ## Build / Deploy
 - Checkout this repo to the required host in a servable directory (e.g. `/var/www/html`)
 - Start your server  (e.g. `http-server`, `httpd start`, etc)
