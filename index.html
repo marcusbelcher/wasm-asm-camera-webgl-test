@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />s
+    <title>
+        Tests
+    </title>
+    <meta name="description" content="Tests for ASM, WASM, HTTPS, WebGL, getUserMedia, and successful camera access">
+    <script type="text/javascript" src="adapter.js"></script>
+</head>
+
+<body>
+    <p>Tests for ASM, WASM, HTTPS, WebGL, getUserMedia, and successful camera access.</p>
+    <p>On success we expect to see a video object showing a live camera feed.</p>
+    <p>Check the console for any errors and warnings.</p>
+
+    <script type="text/javascript">
+        var canUseWebAssembly = function () {
+            return typeof WebAssembly === 'object' ? true : false;
+        };
+
+        var canUseASM = function () {
+            try {
+                (function MyAsmModule() { "use asm"; return {} })();
+                return true;
+            }
+            catch (err) {
+                return false;
+            }
+        };
+
+        var canUseWebGL = function () {
+            try {
+                const canvas = document.createElement('canvas');
+                let webgl = !!(window).WebGLRenderingContext && (
+                    canvas.getContext('webgl') || canvas.getContext('experimental-webgl'));
+                return webgl ? true : false;
+            }
+            catch (e) {
+                return false;
+            }
+        };
+
+        var isHTTPS = function () {
+            return (location.protocol === 'https:') ? true : false;
+        };
+
+        var canUseGetUserMedia = function () {
+            if (navigator && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                return true;
+            }
+
+            return false;
+        };
+
+        var captureAndInjectCameraFeed = function (callback) {
+            var video = document.createElement('video');
+            video.width = 640;
+            video.height = 480;
+            video.setAttribute('autoplay', '');
+
+            var constraints = {
+                audio: false,
+                video: {
+                    width: 640,
+                    height: 480
+                }
+            };
+
+            function handleSuccess(stream) {
+                window.stream = stream; // make stream available to browser console
+                video.srcObject = stream;
+                document.body.appendChild(video);
+                callback(true);
+            }
+
+            function handleError(error) {
+                console.log('navigator.getUserMedia error: ', error);
+                callabck(false);
+            }
+
+            navigator.mediaDevices.getUserMedia(constraints).
+                then(handleSuccess).catch(handleError);
+        };
+
+        var runTests = function () {
+            var returnCode = 0;
+
+            // Warnings
+            if(!canUseWebAssembly) {
+                console.log('Warning, WebAssembly not supported. Performance may be a degraded, should fallback to ASM.');
+                returnCode = 1;
+            }
+
+            if (!canUseASM) {
+                console.log('Warning, ASM not supported. Performance may be a degraded, will fallback to standard JavaScript execution.');
+                returnCode = 1;
+            }
+
+            if (!isHTTPS) {
+                console.log('Warning, web camera access might be blocked. Most browsers only allow access to the web camera when the site is secure');
+                returnCode = 1;
+            }
+
+            // Errors
+            if (!canUseWebGL) {
+                console.log('Error, browser not supported. Web browser does not support WebGL.');
+                returnCode = 2;
+            }
+
+            if (!canUseGetUserMedia) {
+                console.log('Error, browser not supported. Web browser does not support getting a web camera.');
+                returnCode = 2;
+            }
+
+            return returnCode;
+        };
+
+        window.onload = function (e) {
+            switch (runTests) {
+                case 1:
+                    console.log('Tests passed but with warnings');
+                    break;
+                case 2:
+                    console.log('Tests failed');
+                    break;
+                default:
+                    captureAndInjectCameraFeed(function (passed) {
+                        if (passed) {
+                            console.log('Tests passed, camera was found and injected into body');
+                        } else {
+                            console.log('Warning, Tests passed however could not find a camera to inject into the body, please check the "navigator.getUserMedia error" console log');
+                        }
+                    });
+                    break;
+            }
+        };
+    </script>
+</body>
+
+</html>
