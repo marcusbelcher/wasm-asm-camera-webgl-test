@@ -103,11 +103,7 @@
             video.setAttribute('autoplay', '');
 
             var constraints = {
-                audio: false,
-                video: {
-                    width: 640,
-                    height: 480
-                }
+                video: true
             };
 
             function handleSuccess(stream) {
