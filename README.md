@@ -2,7 +2,7 @@
 # README
 This repo is a simple test case for anyone to use - as is - to check similar browser compatibility issues. Primarily tests cases for Webcam/Camera access via getUserMedia, HTTPS (as some browsers block camera access from unsecured sites), WebAssembly, ASM, and WebGL. 
 
-Live example here: https://marcusbelcher.github.io/emscripten-webcam-gl-test/index.html
+Live example here: https://marcusbelcher.github.io/wasm-asm-camera-webgl-test/index.html
 
 ## Build / Deploy
 - Checkout this repo to the required host in a servable directory (e.g. `/var/www/html`)
