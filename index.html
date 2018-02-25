@@ -17,24 +17,42 @@
 
 <body>
     <div>
-        <h1>Tests example</h1>
-        <p>Tests for ASM, WASM, HTTPS, WebGL, getUserMedia, and successful camera access.</p>
+        <a href="javascript:void(0)" onclick="goToHTTPS()">Force redirect to HTTPS</a>
+        <p>
+            <strong>Tests:</strong>
+        </p>
+        <ul id="tests">
+
+        </ul>
         <p>Check the console for any other errors and warnings.</p>
-        <p>On success we expect to see a video object showing a live camera feed, otherwise an error message will show. </p>
+        <p>On success we expect to see a video object showing a live camera feed, otherwise an error message will show.</p>
     </div>
 
     <script type="text/javascript">
+        var testsUl = document.getElementById('tests');
         var codes = {
             error: 2,
             warning: 1,
-            ok: 0
+            ok: 0,
+            toColor: function (code) {
+                switch (code) {
+                    case 0:
+                        return '#00AF00';
+                    case 1:
+                        return '#FFAF00';
+                    case 2:
+                        return '#AF0000';
+                    default:
+                        return '#000000';
+                }
+            }
         };
 
-        var canUseWebAssembly = function () {
+        var testWebAssembly = function () {
             return typeof WebAssembly === 'object' ? true : false;
         };
 
-        var canUseASM = function () {
+        var testASM = function () {
             try {
                 (function MyAsmModule() { "use asm"; return {} })();
                 return true;
@@ -44,7 +62,7 @@
             }
         };
 
-        var canUseWebGL = function () {
+        var testWebGL = function () {
             try {
                 const canvas = document.createElement('canvas');
                 let webgl = !!(window).WebGLRenderingContext && (
@@ -56,11 +74,11 @@
             }
         };
 
-        var isHTTPS = function () {
+        var testHTTPS = function () {
             return (location.protocol === 'https:') ? true : false;
         };
 
-        var canUseGetUserMedia = function () {
+        var testGetUserMedia = function () {
             if (navigator && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 return true;
             }
@@ -102,69 +120,82 @@
             var returnCode = codes.ok;
 
             // Warnings
-            if (!canUseWebAssembly) {
-                console.log('Warning, WebAssembly not supported. Performance may be a degraded, should fallback to ASM.');
+            if (!testWebAssembly) {
+                outputTest('WebAssembly: Warning, WebAssembly not supported. Performance may be a degraded, should fallback to ASM.', codes.warning);
                 returnCode = codes.warning;
+            } else {
+                outputTest('WebAssembly: Success.', codes.ok);
             }
 
-            if (!canUseASM) {
-                console.log('Warning, ASM not supported. Performance may be a degraded, will fallback to standard JavaScript execution.');
+            if (!testASM) {
+                outputTest('ASM: Warning, ASM not supported. Performance may be a degraded, will fallback to standard JavaScript execution.', codes.warning);
                 returnCode = codes.warning;
+            } else {
+                outputTest('ASM: Success.', codes.ok);
             }
 
-            if (!isHTTPS) {
-                console.log('Warning, web camera access might be blocked. Most browsers only allow access to the web camera when the site is secure');
+            if (!testHTTPS) {
+                outputTest('HTTPS: Warning, served from HTTP, Camera access might be blocked depending on Browser.', codes.warning);
                 returnCode = codes.warning;
+            } else {
+                outputTest('HTTPS: Success.', codes.ok);
             }
 
             // Errors
-            if (!canUseWebGL) {
-                console.log('Error, browser not supported. Web browser does not support WebGL.');
+            if (!testWebGL) {
+                outputTest('WebGL: Error, browser not supported.', codes.error);
                 returnCode = codes.error;
+            } else {
+                outputTest('WebGL: Success.', codes.ok);
             }
 
-            if (!canUseGetUserMedia) {
-                console.log('Error, browser not supported. Web browser does not support getting a web camera.');
+            if (!testGetUserMedia) {
+                outputTest('getUserMedia: Error, browser not supported.', codes.error);
                 returnCode = codes.error;
+            } else {
+                outputTest('getUserMedia: Success.', codes.ok);
             }
 
             return returnCode;
         };
 
-        var appendMessage = function (element, message, color) {
+        var appendElement = function (element, message, code) {
             var e = document.createElement(element);
-            e.style.color = color;
+            e.style.color = codes.toColor(code);
             e.innerHTML = message;
             document.body.appendChild(e);
+            console.log(message);
         };
 
-        window.onload = function (e) {
-            var code = runTests();
-            switch (code) {
-                case codes.warning:
-                    console.log('Tests passed but with warnings');
-                    appendMessage('h2', 'Tests passed but with warnings', '#FFAF00');
-                    break;
-                case codes.error:
-                    console.log('', 'Tests failed');
-                    appendMessage('h2', 'Tests passed but with warnings', '#FF0000');
-                    break;
-                default:
-                    console.log('Tests passed');
-                    appendMessage('h2', 'Tests passed', '#00FF00');
-                    break;
-            }
+        var outputTest = function (message, code) {
+            var li = document.createElement('li');
+            li.style.color = codes.toColor(code);
+            li.innerHTML = message;
+            testsUl.appendChild(li);
+            console.log(message);
+        };
 
-            if (code < codes.error) {
-                captureAndInjectCameraFeed(function (error, message) {
-                    if (!error) {
-                        console.log('Camera was found and injected into body');
-                    } else {
-                        console.log('Warning, Tests passed however could not find a camera to inject into the body, please check the "navigator.getUserMedia error" console log');
-                        appendMessage('h2', 'Failed to capture a camera stream', '#FFAF00');
-                        appendMessage('p', JSON.stringify(message), '#FFAF00');
-                    }
-                });
+        var onTestsPassed = function (e) {
+            captureAndInjectCameraFeed(function (error, message) {
+                if (!error) {
+                    outputTest('Camera: Success, was found and injected into the webpage', codes.ok);
+                } else {
+                    outputTest('Camera: Failed, an error occured and did not inject camera feed into the webpage.', codes.error);
+                    appendElement('p', 'Error: ' + JSON.stringify(message), codes.error);
+                    appendElement('p', 'This error may appear if you have not clicked a permissions pop up (browser dependant), manually blocked the camera, or if the experience is being served from an unsecured host. If the HTTPS test failed please click "Force redirect to HTTPS" and try again.', codes.error);
+                }
+            });
+        };
+
+        var goToHTTPS = function () {
+            location.href = 'https:' + window.location.href.substring(window.location.protocol.length);
+        }
+
+        window.onload = function (e) {
+            if (runTests() < codes.error) {
+                onTestsPassed();
+            } else {
+                appendElement('p', 'Due to found errors camera streaming will not be injected.', codes.error);
             }
         };
     </script>
