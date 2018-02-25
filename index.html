@@ -74,8 +74,8 @@
 
         var testWebGL = function () {
             try {
-                const canvas = document.createElement('canvas');
-                let webgl = !!(window).WebGLRenderingContext && (
+                var canvas = document.createElement('canvas');
+                var webgl = !!(window).WebGLRenderingContext && (
                     canvas.getContext('webgl') || canvas.getContext('experimental-webgl'));
                 return webgl ? true : false;
             }
