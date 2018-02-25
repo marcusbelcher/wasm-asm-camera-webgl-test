@@ -58,11 +58,11 @@
             }
         };
 
-        var testWebAssembly = function () {
+        function testWebAssembly() {
             return typeof WebAssembly === 'object' ? true : false;
         };
 
-        var testASM = function () {
+        function testASM() {
             try {
                 (function MyAsmModule() { "use asm"; return {} })();
                 return true;
@@ -72,7 +72,7 @@
             }
         };
 
-        var testWebGL = function () {
+        function testWebGL() {
             try {
                 var canvas = document.createElement('canvas');
                 var webgl = !!(window).WebGLRenderingContext && (
@@ -84,11 +84,11 @@
             }
         };
 
-        var testHTTPS = function () {
+        function testHTTPS() {
             return (location.protocol === 'https:') ? true : false;
         };
 
-        var testGetUserMedia = function () {
+        function testGetUserMedia() {
             if (navigator && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 return true;
             }
@@ -96,7 +96,7 @@
             return false;
         };
 
-        var captureAndInjectCameraFeed = function (callback) {
+        function captureAndInjectCameraFeed(callback) {
             var video = document.createElement('video');
             video.width = 640;
             video.height = 480;
@@ -126,25 +126,25 @@
                 then(handleSuccess).catch(handleError);
         };
 
-        var runTests = function () {
+        function runTests() {
             var returnCode = codes.ok;
 
             // Warnings
-            if (!testWebAssembly) {
+            if (!testWebAssembly()) {
                 outputTest('WebAssembly: Warning, WebAssembly not supported. Performance may be a degraded, should fallback to ASM.', codes.warning);
                 returnCode = codes.warning;
             } else {
                 outputTest('WebAssembly: Success.', codes.ok);
             }
 
-            if (!testASM) {
+            if (!testASM()) {
                 outputTest('ASM: Warning, ASM not supported. Performance may be a degraded, will fallback to standard JavaScript execution.', codes.warning);
                 returnCode = codes.warning;
             } else {
                 outputTest('ASM: Success.', codes.ok);
             }
 
-            if (!testHTTPS) {
+            if (!testHTTPS()) {
                 outputTest('HTTPS: Warning, served from HTTP, Camera access might be blocked depending on Browser.', codes.warning);
                 returnCode = codes.warning;
             } else {
@@ -152,14 +152,14 @@
             }
 
             // Errors
-            if (!testWebGL) {
+            if (!testWebGL()) {
                 outputTest('WebGL: Error, browser not supported.', codes.error);
                 returnCode = codes.error;
             } else {
                 outputTest('WebGL: Success.', codes.ok);
             }
 
-            if (!testGetUserMedia) {
+            if (!testGetUserMedia()) {
                 outputTest('getUserMedia: Error, browser not supported.', codes.error);
                 returnCode = codes.error;
             } else {
@@ -169,7 +169,7 @@
             return returnCode;
         };
 
-        var appendElement = function (element, message, code) {
+        function appendElement(element, message, code) {
             var e = document.createElement(element);
             e.style.color = codes.toColor(code);
             e.innerHTML = message;
@@ -177,7 +177,7 @@
             console.log(message);
         };
 
-        var outputTest = function (message, code) {
+        function outputTest(message, code) {
             var li = document.createElement('li');
             li.style.color = codes.toColor(code);
             li.innerHTML = message;
@@ -185,7 +185,7 @@
             console.log(message);
         };
 
-        var onTestsPassed = function (e) {
+        function onTestsPassed(e) {
             captureAndInjectCameraFeed(function (error, message) {
                 if (!error) {
                     outputTest('Camera: Success, was found and injected into the webpage', codes.ok);
@@ -197,7 +197,7 @@
             });
         };
 
-        var goToHTTPS = function () {
+        function goToHTTPS() {
             location.href = 'https:' + window.location.href.substring(window.location.protocol.length);
         }
 
