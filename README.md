@@ -2,7 +2,9 @@
 # README
 This repo is a simple test case for anyone to use - as is - to check similar browser compatibility issues. Primarily tests cases for Webcam/Camera access via getUserMedia, HTTPS (as some browsers block camera access from unsecured sites), WebAssembly, ASM, and WebGL. 
 
-Live example here: https://marcusbelcher.github.io/wasm-asm-camera-webgl-test/index.html
+Live example here: https://marcusbelcher.github.io/wasm-asm-camera-webgl-test/index.htm
+
+This repo is also used within an Android test application here: https://github.com/marcusbelcher/android-getUserMedia-test
 
 ## Build / Deploy
 - Checkout this repo to the required host in a servable directory (e.g. `/var/www/html`)
@@ -31,5 +33,17 @@ Live example here: https://marcusbelcher.github.io/wasm-asm-camera-webgl-test/in
 	- Chrome passes all tests and shows a live camera feed.
 	- Firefox passes all tests and shows a live camera feed.
 	- Edge passes all tests, receives a success message from getUserMedia however sometimes it does not show a live feed.
-	- Facebook in-app WebView shows a Permissions error. 
+	- Facebook in-app WebView shows a `NotAllowedError - Permission denied`. 
 	- Slacks in-app webview correctly runs the tests and shows a live camera feed (default app being Chrome, Samsung Internet). If Firefox/Edge are classed as the default app Slack opens the experience in the selected app vs running within its own web browser view.
+	- Custom app (https://github.com/marcusbelcher/android-getUserMedia-test)
+		- If permissions have been granted (Application settings) - all tests passed and live video should be seen
+		- If permissions have not been granted I encounter a `NotReadableError - Could not start source` inside JavaScript. 
+		The difference in errors between this app and Facebook will be down to WebView impementation and Application permissions. 
+
+# Useful links
+- https://github.com/webrtc/adapter (https://webrtc.github.io/adapter/adapter-latest.js) 
+- https://www.webrtc-experiment.com/DetectRTC/
+- https://stackoverflow.com/questions/48775154/notreadableerror-could-not-start-source
+- https://github.com/googlesamples/android-PermissionRequest
+- https://github.com/googlearchive/chromium-webview-samples/tree/master/webrtc-example
+- https://bintray.com/package/readme/google/webrtc/google-webrtc
