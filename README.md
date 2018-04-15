@@ -2,7 +2,7 @@
 # README
 This repo is a simple test case for anyone to use - as is - to check similar browser compatibility issues. Primarily tests cases for Webcam/Camera access via getUserMedia, HTTPS (as some browsers block camera access from unsecured sites), WebAssembly, ASM, and WebGL. 
 
-Live example here: https://marcusbelcher.github.io/wasm-asm-camera-webgl-test/index.htm
+Live example here: https://marcusbelcher.github.io/wasm-asm-camera-webgl-test/index.html
 
 This repo is also used within an Android test application here: https://github.com/marcusbelcher/android-getUserMedia-test
 
